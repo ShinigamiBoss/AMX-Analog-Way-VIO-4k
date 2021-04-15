@@ -1,4 +1,4 @@
-MODULE_NAME='Analog_Way_VIO_4K' (DEV dvAnalogWay, DEV vdvAnalogWay, CHAR IPAddress[])
+MODULE_NAME='Analog Way VIO 4K' (DEV dvAnalogWay, DEV vdvAnalogWay, CHAR IPAddress[])
 (***********************************************************)
 (*          DEVICE NUMBER DEFINITIONS GO BELOW             *)
 (***********************************************************)
@@ -31,7 +31,7 @@ DEFINE_VARIABLE
 CHAR LineFeed[] = {$0A}
 CHAR CrLf[] = {$0D,$0A}
 
-CHAR ConnectionFeed[] = "'TPCon'"
+CHAR ConnectionFeed[] = 'TPCon'
 INTEGER ClientConnected
 
 //General note the end of the format is Line Feed, indicated with (LF)
@@ -105,16 +105,16 @@ DATA_EVENT[dvAnalogWay]
 
         if(FIND_STRING(Buffer,ConnectionFeed,1))
         {
-            REMOVE_STRING(Buffer,ConnectionFeed,1)
+            REMOVE_STRING(Buffer, ConnectionFeed, 1)
             ClientConnected = ATOI(Buffer)
-            SEND_COMMAND AMXMaster,"'ANALOGWAY CLIENTS: ',Buffer)
+            SEND_COMMAND AMXMaster,"'ANALOGWAY CLIENTS: ',Buffer"
         }
 
         if(FIND_STRING(Buffer,QueryView,1))
         {
             REMOVE_STRING(Buffer,QueryView,1)
             CurrentView = ATOI(Buffer)
-            SEND_COMMAND AMXMaster,"'ANALOGWAY VIEW: ',Buffer)
+            SEND_COMMAND AMXMaster,"'ANALOGWAY VIEW: ',Buffer"
 
         }
 
@@ -122,7 +122,7 @@ DATA_EVENT[dvAnalogWay]
         {
             REMOVE_STRING(Buffer,ChangeLayerSource,1)
             CurrentLayerSource = atoi(Buffer)
-            SEND_COMMAND AMXMaster,"'ANALOGWAY LAYER SOURCE: ',Buffer)
+            SEND_COMMAND AMXMaster,"'ANALOGWAY LAYER SOURCE: ',Buffer"
 
         }
     }
@@ -195,7 +195,7 @@ TIMELINE_EVENT[FEEDBACK_TIMELINE]
 (* X-Series masters, changing variables in the DEFINE_PROGRAM    *)
 (* section of code can negatively impact program performance.    *)
 (*                                                               *)
-(* See ï¿½Differences in DEFINE_PROGRAM Program Executionï¿½ section *)
+(* See Ã¯Â¿Â½Differences in DEFINE_PROGRAM Program ExecutionÃ¯Â¿Â½ section *)
 (* of the NX-Series Controllers WebConsole & Programming Guide   *)
 (* for additional and alternate coding methodologies.            *)
 (*****************************************************************)
