@@ -110,6 +110,14 @@ DATA_EVENT[dvAnalogWay]
             SEND_COMMAND AMXMaster,"'ANALOGWAY CLIENTS: ',Buffer"
         }
 
+        if(FIND_STRING(Buffer,QueryPreset,1))
+        {
+            REMOVE_STRING(Buffer,QueryPreset,1)
+            CurrentView = ATOI(Buffer)
+            SEND_COMMAND AMXMaster,"'ANALOGWAY PRESET: ',Buffer"
+
+        }
+
         if(FIND_STRING(Buffer,QueryView,1))
         {
             REMOVE_STRING(Buffer,QueryView,1)
