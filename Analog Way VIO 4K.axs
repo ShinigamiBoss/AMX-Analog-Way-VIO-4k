@@ -1,10 +1,10 @@
-MODULE_NAME='Analog Way VIO 4K' (DEV dvAnalogWay, DEV vdvAnalogWay, CHAR IPAddress[])
+MODULE_NAME='Analog Way VIO 4K' (DEV dvAnalogWay, DEV vdvAnalogWay, CHAR IPAddress[], INTEGER Preset, CHAR View[], INTEGER Layer, INTEGER QuickView)
 (***********************************************************)
 (*          DEVICE NUMBER DEFINITIONS GO BELOW             *)
 (***********************************************************)
 DEFINE_DEVICE
 
-AMXMaster = 0:1:0
+AMXMaster = 0:0:0
 
 (***********************************************************)
 (*               CONSTANT DEFINITIONS GO BELOW             *)
@@ -35,26 +35,27 @@ CHAR ConnectionFeed[] = 'TPCon'
 INTEGER ClientConnected
 
 //General note the end of the format is Line Feed, indicated with (LF)
-//the parameters are between <>
+//the parameters are between <>, they start from 0 means taht screen is fro 0 to 63
 //Format: <bank>,1PKrcr(LF)
 CHAR LoadPreset[] = ',1PKrcr'
 CHAR QueryPreset[] = 'PKrcr'
-INTEGER CurrentPreset = 0
 CHAR LoadPresetCommand[] = 'PRESET-'
 
-//Format: <bank>,<screen>,<input>,1PBrcr(LF)
-CHAR LoadView[] = ',1PBrcr'
-CHAR QueryView[] = 'PBrcr'
-INTEGER CurrentView = 0
+//Format: <bank>,<screen>,1PBirr(LF)
+CHAR LoadView[] = ',1PBirr'
+CHAR QueryView[] = 'PBirr'
 CHAR LoadViewCommand[] = 'VIEW-'
 
 //Format: <source>PRinp,LF
 //This format is an exception from the previous one because the command doesn't need multiple parameter and/or special character
 CHAR ChangeLayerSource[] = 'PRinp'
-INTEGER CurrentLayerSource = 0
 CHAR ChangeLayerSourceCommand[] = 'LAYERSOURCE-'
 
 
+//Format: <On/Off>QFfor(LF)
+//Note ON is 1 Off is 0
+CHAR QuickFrameControl[] = 'QFfor'
+CHAR QuickFrameCommand[] = 'QUICKFRAME-'  
 INTEGER QueryCommandNumber = 0
 
 (***********************************************************)
@@ -107,31 +108,24 @@ DATA_EVENT[dvAnalogWay]
         {
             REMOVE_STRING(Buffer, ConnectionFeed, 1)
             ClientConnected = ATOI(Buffer)
-            SEND_COMMAND AMXMaster,"'ANALOGWAY CLIENTS: ',Buffer"
-        }
-
-        if(FIND_STRING(Buffer,QueryPreset,1))
-        {
-            REMOVE_STRING(Buffer,QueryPreset,1)
-            CurrentView = ATOI(Buffer)
-            SEND_COMMAND AMXMaster,"'ANALOGWAY PRESET: ',Buffer"
-
         }
 
         if(FIND_STRING(Buffer,QueryView,1))
         {
             REMOVE_STRING(Buffer,QueryView,1)
-            CurrentView = ATOI(Buffer)
-            SEND_COMMAND AMXMaster,"'ANALOGWAY VIEW: ',Buffer"
-
+            View = Buffer
         }
 
         if(FIND_STRING(Buffer,ChangeLayerSource,1))
         {
             REMOVE_STRING(Buffer,ChangeLayerSource,1)
-            CurrentLayerSource = atoi(Buffer)
-            SEND_COMMAND AMXMaster,"'ANALOGWAY LAYER SOURCE: ',Buffer"
-
+            Layer = atoi(Buffer)
+        }
+	
+	if(FIND_STRING(Buffer,QuickFrameControl,1))
+        {
+            REMOVE_STRING(Buffer,QuickFrameControl,1)
+            QuickView = atoi(Buffer)
         }
     }
 }
@@ -156,11 +150,11 @@ DATA_EVENT[vdvAnalogWay]
         }
         //Load preset command format:
         //VIEW-1,1,1
-        //Example above load view from bank 1, screen 1, input 1
+        //Example above load view from bank 1, screen 1
         IF(FIND_STRING(CommandBuffer,LoadViewCommand,1))
         {
             REMOVE_STRING(CommandBuffer,LoadViewCommand,1)
-            SEND_STRING dvAnalogWay,"CommandBuffer,LoadViewCommand,LineFeed"
+            SEND_STRING dvAnalogWay,"CommandBuffer,LoadView,LineFeed"
         }
         //Load preset command format:
         //LAYERSOURCE-1
@@ -168,7 +162,16 @@ DATA_EVENT[vdvAnalogWay]
         IF(FIND_STRING(CommandBuffer,ChangeLayerSourceCommand,1))
         {
             REMOVE_STRING(CommandBuffer,ChangeLayerSourceCommand,1)
-            SEND_STRING dvAnalogWay,"CommandBuffer,LoadViewCommand,LineFeed"
+            SEND_STRING dvAnalogWay,"CommandBuffer,ChangeLayerSource,LineFeed"
+        }
+	
+	//Show the QuickFrame to the output:
+        //QUICKFRAME-1
+        //Example above show the quickframe
+        IF(FIND_STRING(CommandBuffer,QuickFrameCommand,1))
+        {
+            REMOVE_STRING(CommandBuffer,QuickFrameCommand,1)
+            SEND_STRING dvAnalogWay,"CommandBuffer,QuickFrameControl,LineFeed"
         }
 
     }
@@ -191,6 +194,11 @@ TIMELINE_EVENT[FEEDBACK_TIMELINE]
         {
             SEND_STRING dvAnalogWay,"ChangeLayerSource,LineFeed"
         }
+	case 4:
+	{
+	    SEND_STRING dvAnalogWay,"QuickFrameControl,LineFeed"
+	    QueryCommandNumber = 0
+	}
     }
     QueryCommandNumber++
 }
