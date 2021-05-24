@@ -10,4 +10,4 @@ The supported commands are the followings:
 
 If you want to add more commands please feel free to ask for them in the issue section and I will add it.
 
-Please consider donating for more work and projects: [PayPal ShinigamiBoss](https://paypal.me/shinigamiboss?locale.x=en_US)
+Please consider donating for more work and projects: [PayPal](https://paypal.me/shinigamiboss?locale.x=en_US)
